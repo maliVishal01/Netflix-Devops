@@ -23,14 +23,14 @@ export default function Footer() {
         }}
       >
         <Typography color="grey.700" variant="h6" component="span">
-          Developed by{" "}
+          © 2026 Developed by{" "}
           <Link
             target="_blank"
             underline="none"
             sx={{ color: "text.primary" }}
-            href="https://github.com/crazy-man22"
+            href="https://github.com/maliVishal01"
           >
-            Crazy Man
+            Vishal Mali (DevOps Engineer)
           </Link>
         </Typography>
       </Divider>

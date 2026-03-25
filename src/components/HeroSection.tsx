@@ -1,17 +1,13 @@
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Box from "@mui/material/Box";
+<<<<<<< Updated upstream
 import Stack from "@mui/material/Stack";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+=======
+>>>>>>> Stashed changes
 
 import { getRandomNumber } from "src/utils/common";
-import MaxLineTypography from "./MaxLineTypography";
-import PlayButton from "./PlayButton";
-import MoreInfoButton from "./MoreInfoButton";
-import NetflixIconButton from "./NetflixIconButton";
-import MaturityRate from "./MaturityRate";
-import useOffSetTop from "src/hooks/useOffSetTop";
-import { useDetailModal } from "src/providers/DetailModalProvider";
 import { MEDIA_TYPE } from "src/types/Common";
 import {
   useGetVideosByMediaTypeAndCustomGenreQuery,
@@ -30,6 +26,7 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
     page: 1,
   });
 
+<<<<<<< Updated upstream
   const [getVideoDetail, { data: detail }] =
     useLazyGetAppendedVideosQuery();
 
@@ -43,6 +40,13 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
   const maturityRate = useMemo(() => getRandomNumber(20), []);
 
   // 🎯 Select random movie
+=======
+  const [video, setVideo] = useState<Movie | null>(null);
+  const [getVideoDetail, { data: detail }] =
+    useLazyGetAppendedVideosQuery();
+
+  // 🔥 Select random video
+>>>>>>> Stashed changes
   useEffect(() => {
     if (data?.results) {
       const videos = data.results.filter((item) => !!item.backdrop_path);
@@ -50,20 +54,29 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
     }
   }, [data]);
 
+<<<<<<< Updated upstream
   // 🎯 Fetch video detail
+=======
+  // 🔥 Fetch video details
+>>>>>>> Stashed changes
   useEffect(() => {
     if (video) {
       getVideoDetail({ mediaType, id: video.id });
     }
   }, [video]);
 
+<<<<<<< Updated upstream
   // 🔥 SAFE VIDEO KEY
+=======
+  // 🔥 FIXED: Safe video key handling
+>>>>>>> Stashed changes
   const videoKey = useMemo(() => {
     if (!detail?.videos?.results || detail.videos.results.length === 0) {
       return null;
     }
     return detail.videos.results[0].key;
   }, [detail]);
+<<<<<<< Updated upstream
 
   const handleMute = useCallback(() => {
     setMuted((prev) => !prev);
@@ -181,6 +194,40 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
 
         </Box>
       </Box>
+=======
+
+  return (
+    <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+      
+      {/* 🔥 FIXED PLAYER */}
+      {video && (
+        <>
+          {videoKey ? (
+            <VideoJSPlayer
+              options={{
+                autoplay: true,
+                controls: true,
+                responsive: true,
+                fluid: true,
+                sources: [
+                  {
+                    src: `https://www.youtube.com/embed/${videoKey}`,
+                    type: "video/youtube",
+                  },
+                ],
+              }}
+            />
+          ) : (
+            // 🔥 FALLBACK IMAGE (NO VIDEO CASE)
+            <img
+              src={`https://image.tmdb.org/t/p/original${video.backdrop_path}`}
+              alt="banner"
+              style={{ width: "100%", height: "auto" }}
+            />
+          )}
+        </>
+      )}
+>>>>>>> Stashed changes
     </Box>
   );
 }
