@@ -23,6 +23,7 @@ import MainLoadingScreen from "src/components/MainLoadingScreen";
 
 export function Component() {
   const playerRef = useRef<Player | null>(null);
+
   const [playerState, setPlayerState] = useState({
     paused: false,
     muted: false,
@@ -36,63 +37,64 @@ export function Component() {
   const [playerInitialized, setPlayerInitialized] = useState(false);
 
   const windowSize = useWindowSize();
+
+  // 🔥 FIXED VIDEO SOURCE (MP4 - WORKING)
   const videoJsOptions = useMemo(() => {
     return {
-      preload: "metadata",
+      preload: "auto",
       autoplay: true,
       controls: false,
-      // responsive: true,
-      // fluid: true,
+      fluid: true,
       width: windowSize.width,
       height: windowSize.height,
       sources: [
         {
-          // src: videoData?.video,
-          // src: "https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
-          src: "https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
-          type: "application/x-mpegurl",
+          src: "https://www.w3schools.com/html/mov_bbb.mp4", // ✅ WORKING VIDEO
+          type: "video/mp4",
         },
       ],
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowSize]);
 
   const handlePlayerReady = function (player: Player): void {
     player.on("pause", () => {
-      setPlayerState((draft) => {
-        return { ...draft, paused: true };
-      });
+      setPlayerState((prev) => ({ ...prev, paused: true }));
     });
 
     player.on("play", () => {
-      setPlayerState((draft) => {
-        return { ...draft, paused: false };
-      });
+      setPlayerState((prev) => ({ ...prev, paused: false }));
     });
 
     player.on("timeupdate", () => {
-      setPlayerState((draft) => {
-        return { ...draft, playedSeconds: player.currentTime() };
-      });
+      setPlayerState((prev) => ({
+        ...prev,
+        playedSeconds: player.currentTime(),
+      }));
     });
 
     player.one("durationchange", () => {
       setPlayerInitialized(true);
-      setPlayerState((draft) => ({ ...draft, duration: player.duration() }));
+      setPlayerState((prev) => ({
+        ...prev,
+        duration: player.duration(),
+      }));
     });
 
     playerRef.current = player;
 
-    setPlayerState((draft) => {
-      return { ...draft, paused: player.paused() };
-    });
+    setPlayerState((prev) => ({
+      ...prev,
+      paused: player.paused(),
+    }));
   };
 
   const handleVolumeChange: SliderUnstyledOwnProps["onChange"] = (_, value) => {
-    playerRef.current?.volume((value as number) / 100);
-    setPlayerState((draft) => {
-      return { ...draft, volume: (value as number) / 100 };
-    });
+    const vol = (value as number) / 100;
+    playerRef.current?.volume(vol);
+    setPlayerState((prev) => ({
+      ...prev,
+      volume: vol,
+    }));
   };
 
   const handleSeekTo = (v: number) => {
@@ -105,148 +107,106 @@ export function Component() {
 
   if (!!videoJsOptions.width) {
     return (
-      <Box
-        sx={{
-          position: "relative",
-        }}
-      >
+      <Box sx={{ position: "relative" }}>
         <VideoJSPlayer options={videoJsOptions} onReady={handlePlayerReady} />
+
+        {!playerInitialized && <MainLoadingScreen />}
+
         {playerRef.current && playerInitialized && (
-          <Box
-            sx={{
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              position: "absolute",
-            }}
-          >
+          <Box sx={{ position: "absolute", inset: 0 }}>
+
+            {/* BACK BUTTON */}
             <Box px={2} sx={{ position: "absolute", top: 75 }}>
               <PlayerControlButton onClick={handleGoBack}>
                 <KeyboardBackspaceIcon />
               </PlayerControlButton>
             </Box>
-            <Box
-              px={2}
-              sx={{
-                position: "absolute",
-                top: { xs: "40%", sm: "55%", md: "60%" },
-                left: 0,
-              }}
-            >
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 700,
-                  color: "white",
-                }}
-              >
+
+            {/* TITLE */}
+            <Box px={2} sx={{ position: "absolute", top: "60%", left: 0 }}>
+              <Typography variant="h3" sx={{ color: "white", fontWeight: 700 }}>
                 Title
               </Typography>
             </Box>
-            <Box
-              px={{ xs: 0, sm: 1, md: 2 }}
-              sx={{
-                position: "absolute",
-                top: { xs: "50%", sm: "60%", md: "70%" },
-                right: 0,
-              }}
-            >
+
+            {/* AGE */}
+            <Box px={2} sx={{ position: "absolute", top: "65%", right: 0 }}>
               <Typography
                 variant="subtitle2"
                 sx={{
                   px: 1,
                   py: 0.5,
-                  fontWeight: 700,
-                  color: "white",
                   bgcolor: "red",
-                  borderRadius: "12px 0px 0px 12px",
+                  color: "white",
+                  borderRadius: "12px 0 0 12px",
                 }}
               >
                 12+
               </Typography>
             </Box>
 
-            <Box
-              px={{ xs: 1, sm: 2 }}
-              sx={{ position: "absolute", bottom: 20, left: 0, right: 0 }}
-            >
-              {/* Seekbar */}
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <PlayerSeekbar
-                  playedSeconds={playerState.playedSeconds}
-                  duration={playerState.duration}
-                  seekTo={handleSeekTo}
-                />
-              </Stack>
-              {/* end Seekbar */}
+            {/* CONTROLS */}
+            <Box px={2} sx={{ position: "absolute", bottom: 20, left: 0, right: 0 }}>
 
-              {/* Controller */}
+              {/* SEEK BAR */}
+              <PlayerSeekbar
+                playedSeconds={playerState.playedSeconds}
+                duration={playerState.duration}
+                seekTo={handleSeekTo}
+              />
+
+              {/* CONTROLS */}
               <Stack direction="row" alignItems="center">
-                {/* left controller */}
-                <Stack
-                  direction="row"
-                  spacing={{ xs: 0.5, sm: 1.5, md: 2 }}
-                  alignItems="center"
-                >
+
+                {/* LEFT */}
+                <Stack direction="row" spacing={2} alignItems="center">
+
                   {!playerState.paused ? (
-                    <PlayerControlButton
-                      onClick={() => {
-                        playerRef.current?.pause();
-                      }}
-                    >
+                    <PlayerControlButton onClick={() => playerRef.current?.pause()}>
                       <PauseIcon />
                     </PlayerControlButton>
                   ) : (
-                    <PlayerControlButton
-                      onClick={() => {
-                        playerRef.current?.play();
-                      }}
-                    >
+                    <PlayerControlButton onClick={() => playerRef.current?.play()}>
                       <PlayArrowIcon />
                     </PlayerControlButton>
                   )}
+
                   <PlayerControlButton>
                     <SkipNextIcon />
                   </PlayerControlButton>
+
                   <VolumeControllers
                     muted={playerState.muted}
                     handleVolumeToggle={() => {
                       playerRef.current?.muted(!playerState.muted);
-                      setPlayerState((draft) => {
-                        return { ...draft, muted: !draft.muted };
-                      });
+                      setPlayerState((prev) => ({
+                        ...prev,
+                        muted: !prev.muted,
+                      }));
                     }}
                     value={playerState.volume}
                     handleVolume={handleVolumeChange}
                   />
+
                   <Typography variant="caption" sx={{ color: "white" }}>
-                    {`${formatTime(playerState.playedSeconds)} / ${formatTime(
-                      playerState.duration
-                    )}`}
+                    {`${formatTime(playerState.playedSeconds)} / ${formatTime(playerState.duration)}`}
                   </Typography>
                 </Stack>
-                {/* end left controller */}
 
-                {/* middle time */}
+                {/* CENTER */}
                 <Box flexGrow={1}>
                   <MaxLineTypography
                     maxLine={1}
                     variant="subtitle1"
                     textAlign="center"
-                    sx={{ maxWidth: 300, mx: "auto", color: "white" }}
+                    sx={{ color: "white" }}
                   >
                     Description
                   </MaxLineTypography>
                 </Box>
-                {/* end middle time */}
 
-                {/* right controller */}
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  spacing={{ xs: 0.5, sm: 1.5, md: 2 }}
-                >
+                {/* RIGHT */}
+                <Stack direction="row" spacing={2}>
                   <PlayerControlButton>
                     <SettingsIcon />
                   </PlayerControlButton>
@@ -257,15 +217,15 @@ export function Component() {
                     <FullscreenIcon />
                   </PlayerControlButton>
                 </Stack>
-                {/* end right controller */}
+
               </Stack>
-              {/* end Controller */}
             </Box>
           </Box>
         )}
       </Box>
     );
   }
+
   return null;
 }
 
