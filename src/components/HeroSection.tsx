@@ -53,55 +53,47 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
   }, [detail]);
 
   return (
-    <Box sx={{ position: "relative", zIndex: 1 }}>
+    <Box sx={{ position: "relative" }}>
       <Box sx={{ pb: "40%", position: "relative" }}>
-        <Box sx={{ width: "100%", height: "56.25vw", position: "absolute" }}>
+        <Box sx={{ position: "absolute", width: "100%", height: "100%" }}>
 
-          {video && (
+          {video && videoKey && (
             <>
-              {/* 🔥 VIDEO PREVIEW (ALWAYS MUTED) */}
-              {videoKey ? (
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoKey}`}
-                  frameBorder="0"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
-              ) : (
-                <img
-                  src={`https://image.tmdb.org/t/p/original${video.backdrop_path}`}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              )}
+              {/* ALWAYS MUTED PREVIEW */}
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoKey}`}
+                frameBorder="0"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
 
               {/* Overlay */}
               <Box
                 sx={{
-                  background:
-                    "linear-gradient(77deg,rgba(0,0,0,.6),transparent 85%)",
                   position: "absolute",
                   inset: 0,
+                  background:
+                    "linear-gradient(77deg,rgba(0,0,0,.6),transparent 85%)",
                 }}
               />
 
               {/* Content */}
-              <Box sx={{ position: "absolute", bottom: "35%", left: "60px" }}>
-                <MaxLineTypography variant="h2" maxLine={1}>
+              <Box sx={{ position: "absolute", bottom: "30%", left: 60 }}>
+                <MaxLineTypography variant="h2">
                   {video.title}
                 </MaxLineTypography>
 
-                <MaxLineTypography variant="h5" maxLine={3}>
+                <MaxLineTypography variant="h5">
                   {video.overview}
                 </MaxLineTypography>
 
                 <Stack direction="row" spacing={2} mt={2}>
-                  {/* 🔥 PLAY BUTTON FIX */}
                   <PlayButton
                     size="large"
                     onClick={() => {
-                      window.location.href = `/watch?video=${videoKey}`;
+                      window.location.href = "/watch";
                     }}
                   />
 
@@ -114,8 +106,7 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
                 </Stack>
               </Box>
 
-              {/* Age */}
-              <Box sx={{ position: "absolute", right: 0, bottom: "35%" }}>
+              <Box sx={{ position: "absolute", right: 0, bottom: "30%" }}>
                 <MaturityRate>{`${maturityRate}+`}</MaturityRate>
               </Box>
             </>
