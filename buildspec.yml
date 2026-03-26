@@ -6,12 +6,12 @@ phases:
       nodejs: 18
     commands:
       - echo Installing dependencies...
-      - npm install
-      - npm install -g typescript 
+      - npm ci   # 🔥 MUST USE
 
   build:
     commands:
       - echo Building application...
+      - npx tsc   # 🔥 ensure tsc works
       - npm run build
 
 artifacts:
