@@ -38,7 +38,7 @@ export function Component() {
 
   const windowSize = useWindowSize();
 
-  // 🔥 FIXED VIDEO SOURCE (MP4 - WORKING)
+  // FINAL WORKING VIDEO (SOUND + CONTROL OK)
   const videoJsOptions = useMemo(() => {
     return {
       preload: "auto",
@@ -49,7 +49,7 @@ export function Component() {
       height: windowSize.height,
       sources: [
         {
-          src: "https://www.w3schools.com/html/mov_bbb.mp4", // ✅ WORKING VIDEO
+          src: "https://www.w3schools.com/html/mov_bbb.mp4",
           type: "video/mp4",
         },
       ],
@@ -114,110 +114,56 @@ export function Component() {
 
         {playerRef.current && playerInitialized && (
           <Box sx={{ position: "absolute", inset: 0 }}>
-
-            {/* BACK BUTTON */}
             <Box px={2} sx={{ position: "absolute", top: 75 }}>
               <PlayerControlButton onClick={handleGoBack}>
                 <KeyboardBackspaceIcon />
               </PlayerControlButton>
             </Box>
 
-            {/* TITLE */}
-            <Box px={2} sx={{ position: "absolute", top: "60%", left: 0 }}>
-              <Typography variant="h3" sx={{ color: "white", fontWeight: 700 }}>
-                Title
+            <Box px={2} sx={{ position: "absolute", top: "60%" }}>
+              <Typography variant="h3" sx={{ color: "white" }}>
+                Demo Video
               </Typography>
             </Box>
 
-            {/* AGE */}
-            <Box px={2} sx={{ position: "absolute", top: "65%", right: 0 }}>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  px: 1,
-                  py: 0.5,
-                  bgcolor: "red",
-                  color: "white",
-                  borderRadius: "12px 0 0 12px",
-                }}
-              >
-                12+
-              </Typography>
-            </Box>
-
-            {/* CONTROLS */}
-            <Box px={2} sx={{ position: "absolute", bottom: 20, left: 0, right: 0 }}>
-
-              {/* SEEK BAR */}
+            <Box px={2} sx={{ position: "absolute", bottom: 20, width: "100%" }}>
               <PlayerSeekbar
                 playedSeconds={playerState.playedSeconds}
                 duration={playerState.duration}
                 seekTo={handleSeekTo}
               />
 
-              {/* CONTROLS */}
-              <Stack direction="row" alignItems="center">
-
-                {/* LEFT */}
-                <Stack direction="row" spacing={2} alignItems="center">
-
-                  {!playerState.paused ? (
-                    <PlayerControlButton onClick={() => playerRef.current?.pause()}>
-                      <PauseIcon />
-                    </PlayerControlButton>
-                  ) : (
-                    <PlayerControlButton onClick={() => playerRef.current?.play()}>
-                      <PlayArrowIcon />
-                    </PlayerControlButton>
-                  )}
-
-                  <PlayerControlButton>
-                    <SkipNextIcon />
+              <Stack direction="row" alignItems="center" spacing={2}>
+                {!playerState.paused ? (
+                  <PlayerControlButton onClick={() => playerRef.current?.pause()}>
+                    <PauseIcon />
                   </PlayerControlButton>
-
-                  <VolumeControllers
-                    muted={playerState.muted}
-                    handleVolumeToggle={() => {
-                      playerRef.current?.muted(!playerState.muted);
-                      setPlayerState((prev) => ({
-                        ...prev,
-                        muted: !prev.muted,
-                      }));
-                    }}
-                    value={playerState.volume}
-                    handleVolume={handleVolumeChange}
-                  />
-
-                  <Typography variant="caption" sx={{ color: "white" }}>
-                    {`${formatTime(playerState.playedSeconds)} / ${formatTime(playerState.duration)}`}
-                  </Typography>
-                </Stack>
-
-                {/* CENTER */}
-                <Box flexGrow={1}>
-                  <MaxLineTypography
-                    maxLine={1}
-                    variant="subtitle1"
-                    textAlign="center"
-                    sx={{ color: "white" }}
-                  >
-                    Description
-                  </MaxLineTypography>
-                </Box>
-
-                {/* RIGHT */}
-                <Stack direction="row" spacing={2}>
-                  <PlayerControlButton>
-                    <SettingsIcon />
+                ) : (
+                  <PlayerControlButton onClick={() => playerRef.current?.play()}>
+                    <PlayArrowIcon />
                   </PlayerControlButton>
-                  <PlayerControlButton>
-                    <BrandingWatermarkOutlinedIcon />
-                  </PlayerControlButton>
-                  <PlayerControlButton>
-                    <FullscreenIcon />
-                  </PlayerControlButton>
-                </Stack>
+                )}
 
+                <VolumeControllers
+                  muted={playerState.muted}
+                  handleVolumeToggle={() => {
+                    playerRef.current?.muted(!playerState.muted);
+                    setPlayerState((prev) => ({
+                      ...prev,
+                      muted: !prev.muted,
+                    }));
+                  }}
+                  value={playerState.volume}
+                  handleVolume={handleVolumeChange}
+                />
+
+                <Typography sx={{ color: "white" }}>
+                  {`${formatTime(playerState.playedSeconds)} / ${formatTime(playerState.duration)}`}
+                </Typography>
+
+                <PlayerControlButton>
+                  <FullscreenIcon />
+                </PlayerControlButton>
               </Stack>
             </Box>
           </Box>
