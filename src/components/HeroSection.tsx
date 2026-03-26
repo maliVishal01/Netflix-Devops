@@ -74,23 +74,19 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
           {video && (
             <>
               <Box sx={{ position: "absolute", inset: 0 }}>
+                
                 {videoKey ? (
                   <iframe
-                    key={muted}   // 🔥 FIX ADDED HERE
+                    key={muted} // 🔥 IMPORTANT FIX
                     width="100%"
                     height="100%"
                     src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=${
                       muted ? 1 : 0
-                    }&controls=0&loop=1`}
+                    }&controls=0&loop=1&playlist=${videoKey}`}
                     title="YouTube video"
                     frameBorder="0"
                     allow="autoplay; encrypted-media"
                     allowFullScreen
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                    }}
                   />
                 ) : (
                   <img
@@ -104,6 +100,7 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
                   />
                 )}
 
+                {/* Overlay */}
                 <Box
                   sx={{
                     background:
@@ -113,6 +110,7 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
                   }}
                 />
 
+                {/* Bottom Gradient */}
                 <Box
                   sx={{
                     backgroundImage:
@@ -124,6 +122,7 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
                   }}
                 />
 
+                {/* Mute Button */}
                 <Stack
                   direction="row"
                   spacing={2}
@@ -140,6 +139,7 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
                 </Stack>
               </Box>
 
+              {/* Text Content */}
               <Box sx={{ position: "absolute", inset: 0 }}>
                 <Stack
                   spacing={4}
@@ -159,7 +159,17 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
                   </MaxLineTypography>
 
                   <Stack direction="row" spacing={2}>
-                    <PlayButton size="large" />
+
+                    {/* 🔥 PLAY BUTTON FIX */}
+                    <PlayButton
+                      size="large"
+                      onClick={() => {
+                        if (videoKey) {
+                          window.location.href = `/watch?video=${videoKey}`;
+                        }
+                      }}
+                    />
+
                     <MoreInfoButton
                       size="large"
                       onClick={() =>
