@@ -76,6 +76,7 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
               <Box sx={{ position: "absolute", inset: 0 }}>
                 {videoKey ? (
                   <iframe
+                    key={muted}   // 🔥 FIX ADDED HERE
                     width="100%"
                     height="100%"
                     src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=${
