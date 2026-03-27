@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import Player from "video.js/dist/types/player";
 
 import { getRandomNumber } from "src/utils/common";
 import MaxLineTypography from "./MaxLineTypography";
@@ -18,6 +19,7 @@ import {
   useLazyGetAppendedVideosQuery,
 } from "src/store/slices/discover";
 import { Movie } from "src/types/Movie";
+import VideoJSPlayer from "./watch/VideoJSPlayer";
 
 interface TopTrailerProps {
   mediaType: MEDIA_TYPE;
@@ -29,148 +31,205 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
     apiString: "popular",
     page: 1,
   });
-
-  const [getVideoDetail, { data: detail }] =
-    useLazyGetAppendedVideosQuery();
-
+  const [getVideoDetail, { data: detail }] = useLazyGetAppendedVideosQuery();
   const [video, setVideo] = useState<Movie | null>(null);
   const [muted, setMuted] = useState(true);
-
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<Player | null>(null);
   const isOffset = useOffSetTop(window.innerWidth * 0.5625);
   const { setDetailType } = useDetailModal();
+  const maturityRate = useMemo(() => {
+    return getRandomNumber(20);
+  }, []);
 
-  const maturityRate = useMemo(() => getRandomNumber(20), []);
+  const handleReady = useCallback((player: Player) => {
+    playerRef.current = player;
+  }, []);
 
   useEffect(() => {
-    if (data?.results) {
+    if (playerRef.current) {
+      if (isOffset) {
+        playerRef.current.pause();
+      } else {
+        if (playerRef.current.paused()) {
+          playerRef.current.play();
+        }
+      }
+    }
+  }, [isOffset]);
+
+  useEffect(() => {
+    if (data && data.results) {
       const videos = data.results.filter((item) => !!item.backdrop_path);
       setVideo(videos[getRandomNumber(videos.length)]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useEffect(() => {
     if (video) {
       getVideoDetail({ mediaType, id: video.id });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [video]);
 
-  const videoKey = useMemo(() => {
-    if (!detail?.videos?.results || detail.videos.results.length === 0) {
-      return null;
+  const handleMute = useCallback((status: boolean) => {
+    if (playerRef.current) {
+      playerRef.current.muted(!status);
+      setMuted(!status);
     }
-    return detail.videos.results[0].key;
-  }, [detail]);
-
-  const handleMute = useCallback(() => {
-    setMuted((prev) => !prev);
   }, []);
 
   return (
     <Box sx={{ position: "relative", zIndex: 1 }}>
-      <Box sx={{ mb: 3, pb: "40%", position: "relative" }}>
-        <Box sx={{ width: "100%", height: "56.25vw", position: "absolute" }}>
-
+      <Box
+        sx={{
+          mb: 3,
+          pb: "40%",
+          top: 0,
+          left: 0,
+          right: 0,
+          position: "relative",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            height: "56.25vw",
+            position: "absolute",
+          }}
+        >
           {video && (
             <>
-              <Box sx={{ position: "absolute", inset: 0 }}>
-                {videoKey ? (
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=${
-                      muted ? 1 : 0
-                    }&controls=0&loop=1`}
-                    title="YouTube video"
-                    frameBorder="0"
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
+              <Box
+                sx={{
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  position: "absolute",
+                }}
+              >
+                {detail && (
+                  <VideoJSPlayer
+                    options={{
+                      loop: true,
+                      muted: true,
+                      autoplay: true,
+                      controls: false,
+                      responsive: true,
+                      fluid: true,
+                      techOrder: ["youtube"],
+                      sources: [
+                        {
+                          type: "video/youtube",
+                          src: `https://www.youtube.com/watch?v=${
+                            detail.videos.results[0]?.key || "L3oOldViIgY"
+                          }`,
+                        },
+                      ],
                     }}
-                  />
-                ) : (
-                  <img
-                    src={`https://image.tmdb.org/t/p/original${video.backdrop_path}`}
-                    alt="banner"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
+                    onReady={handleReady}
                   />
                 )}
-
                 <Box
                   sx={{
-                    background:
-                      "linear-gradient(77deg,rgba(0,0,0,.6),transparent 85%)",
-                    position: "absolute",
-                    inset: 0,
-                  }}
-                />
-
-                <Box
-                  sx={{
-                    backgroundImage:
-                      "linear-gradient(180deg,hsla(0,0%,8%,0),#141414)",
-                    position: "absolute",
+                    background: `linear-gradient(77deg,rgba(0,0,0,.6),transparent 85%)`,
+                    top: 0,
+                    left: 0,
                     bottom: 0,
-                    width: "100%",
-                    height: "15vw",
+                    right: "26.09%",
+                    opacity: 1,
+                    position: "absolute",
+                    transition: "opacity .5s",
                   }}
                 />
-
+                <Box
+                  sx={{
+                    backgroundColor: "transparent",
+                    backgroundImage:
+                      "linear-gradient(180deg,hsla(0,0%,8%,0) 0,hsla(0,0%,8%,.15) 15%,hsla(0,0%,8%,.35) 29%,hsla(0,0%,8%,.58) 44%,#141414 68%,#141414)",
+                    backgroundRepeat: "repeat-x",
+                    backgroundPosition: "0px top",
+                    backgroundSize: "100% 100%",
+                    bottom: 0,
+                    position: "absolute",
+                    height: "14.7vw",
+                    opacity: 1,
+                    top: "auto",
+                    width: "100%",
+                  }}
+                />
                 <Stack
                   direction="row"
                   spacing={2}
                   sx={{
+                    alignItems: "center",
                     position: "absolute",
                     right: 0,
                     bottom: "35%",
                   }}
                 >
-                  <NetflixIconButton size="large" onClick={handleMute}>
+                  <NetflixIconButton
+                    size="large"
+                    onClick={() => handleMute(muted)}
+                    sx={{ zIndex: 2 }}
+                  >
                     {!muted ? <VolumeUpIcon /> : <VolumeOffIcon />}
                   </NetflixIconButton>
                   <MaturityRate>{`${maturityRate}+`}</MaturityRate>
                 </Stack>
               </Box>
 
-              <Box sx={{ position: "absolute", inset: 0 }}>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
                 <Stack
                   spacing={4}
                   sx={{
                     bottom: "35%",
                     position: "absolute",
-                    left: "60px",
+                    left: { xs: "4%", md: "60px" },
+                    top: 0,
                     width: "36%",
+                    zIndex: 10,
+                    justifyContent: "flex-end",
                   }}
                 >
-                  <MaxLineTypography variant="h2" maxLine={1}>
+                  <MaxLineTypography
+                    variant="h2"
+                    maxLine={1}
+                    color="text.primary"
+                  >
                     {video.title}
                   </MaxLineTypography>
-
-                  <MaxLineTypography variant="h5" maxLine={3}>
+                  <MaxLineTypography
+                    variant="h5"
+                    maxLine={3}
+                    color="text.primary"
+                  >
                     {video.overview}
                   </MaxLineTypography>
-
-                  <Stack direction="row" spacing={2}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                     <PlayButton size="large" />
                     <MoreInfoButton
                       size="large"
-                      onClick={() =>
-                        setDetailType({ mediaType, id: video.id })
-                      }
+                      onClick={() => {
+                        setDetailType({ mediaType, id: video.id });
+                      }}
                     />
                   </Stack>
                 </Stack>
               </Box>
             </>
           )}
-
         </Box>
       </Box>
     </Box>
